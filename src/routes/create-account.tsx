@@ -3,7 +3,13 @@ import { useState } from "react";
 import styled from "styled-components";
 import { auth } from "./firebase";
 import { useNavigate } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
 
+const errors: Record<string, string> = {
+  "auth/email-already-in-use": "이미 존재하는 이메일입니다.",
+  "auth/weak-password": "비밀번호는 6자리 이상 입력해 주세요",
+  "auth/invalid-login-credentials": "비밀번호가 틀립니다.",
+};
 const Wrapper = styled.div`
   height: 100%;
   display: flex;
@@ -19,6 +25,7 @@ const Title = styled.h1`
 
 const Form = styled.form`
   margin-top: 50px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -68,6 +75,7 @@ export default function CreateAccount() {
 
   const handleSubmin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsError("");
     if (isLoading || name === "" || email === "" || password === "") return;
     try {
       setIsLoading(true);
@@ -81,7 +89,12 @@ export default function CreateAccount() {
         displayName: name,
       });
       navigate("/");
-    } catch (error) {
+    } catch (e) {
+      if (e instanceof FirebaseError) {
+        const errorMessage = errors[e.code];
+        setIsError(errorMessage);
+        console.log(e.code, e.message);
+      }
     } finally {
       setIsLoading(false);
     }
