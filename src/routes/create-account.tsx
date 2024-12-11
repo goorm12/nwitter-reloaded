@@ -22,39 +22,52 @@ const errors: Record<string, string> = {
 
 export default function CreateAccount() {
   const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // const [name, setName] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [password, setPassword] = useState("");
   const [error, setIsError] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const navigate = useNavigate();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       target: { name, value },
     } = e;
 
-    if (name === "name") {
-      setName(value);
-    } else if (name === "email") {
-      setEmail(value);
-    } else if (name === "password") {
-      setPassword(value);
-    }
+    // if (name === "name") {
+    //   setName(value);
+    // } else if (name === "email") {
+    //   setEmail(value);
+    // } else if (name === "password") {
+    //   setPassword(value);
+    // }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsError("");
-    if (isLoading || name === "" || email === "" || password === "") return;
+    if (
+      isLoading ||
+      formData.name === "" ||
+      formData.email === "" ||
+      formData.password === ""
+    )
+      return;
     try {
       setIsLoading(true);
       const credentials = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password
+        formData.email,
+        formData.password
       );
       console.log(credentials.user);
       await updateProfile(credentials.user, {
-        displayName: name,
+        displayName: formData.name,
       });
       navigate("/");
     } catch (e) {
@@ -75,7 +88,7 @@ export default function CreateAccount() {
         <Input
           onChange={handleChange}
           name="name"
-          value={name}
+          value={formData.name}
           placeholder="Name"
           type="text"
           required
@@ -83,7 +96,7 @@ export default function CreateAccount() {
         <Input
           onChange={handleChange}
           name="email"
-          value={email}
+          value={formData.email}
           placeholder="Email"
           type="email"
           required
@@ -91,7 +104,7 @@ export default function CreateAccount() {
         <Input
           onChange={handleChange}
           name="password"
-          value={password}
+          value={formData.password}
           placeholder="Password"
           type="password"
           required
