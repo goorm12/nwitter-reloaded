@@ -5,7 +5,7 @@ export default function Home() {
   const navigate = useNavigate();
   const handleLogOut = () => {
     auth.signOut();
-    navigate("/");
+    navigate("/login");
   };
   return (
     <h1>
