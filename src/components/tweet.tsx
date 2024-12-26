@@ -1,5 +1,8 @@
 import styled from "styled-components";
 import { Itweet } from "./timeline";
+import { auth, db, storage } from "../routes/firebase";
+import { deleteDoc, doc } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
 
 const Wrapper = styled.div`
   display: grid;
@@ -27,14 +30,46 @@ const Payload = styled.p`
   font-size: 18px;
 `;
 
-export default function Tweet({ username, photo, tweet }: Itweet) {
+const DeleteBtn = styled.button`
+  background-color: tomato;
+  color: white;
+  font-weight: 600;
+  border: 0;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+export default function Tweet({ username, photo, tweet, userId, id }: Itweet) {
+  const user = auth.currentUser;
+  const handleDelete = async () => {
+    const ok = confirm("정말로 삭제하시겠습니까?");
+    if (!ok || user?.uid !== userId) return;
+
+    try {
+      await deleteDoc(doc(db, "tweets", id));
+      if (photo) {
+        const photoRef = ref(storage, `tweets/${user.uid}/${id}`);
+        await deleteObject(photoRef);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      //
+    }
+  };
+
   return (
     <Wrapper>
       <Column>
         <Username>{username}</Username>
         <Payload>{tweet}</Payload>
+        {user?.uid === userId ? (
+          <DeleteBtn onClick={handleDelete}>삭제</DeleteBtn>
+        ) : null}
       </Column>
-      {photo ? <Photo src={photo} /> : null}
+      <Column>{photo ? <Photo src={photo} /> : null}</Column>
     </Wrapper>
   );
 }
