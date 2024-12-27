@@ -3,6 +3,8 @@ import { Itweet } from "./timeline";
 import { auth, db, storage } from "../routes/firebase";
 import { deleteDoc, doc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
+import Modal from "./modal";
+import { useState } from "react";
 
 const Wrapper = styled.div`
   display: grid;
@@ -30,6 +32,10 @@ const Payload = styled.p`
   font-size: 18px;
 `;
 
+const BtnWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+`;
 const DeleteBtn = styled.button`
   background-color: tomato;
   color: white;
@@ -41,7 +47,18 @@ const DeleteBtn = styled.button`
   cursor: pointer;
 `;
 
+const EditBtn = styled.button`
+  background-color: #1d9bf0;
+  color: white;
+  font-weight: 600;
+  border: 0;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+`;
 export default function Tweet({ username, photo, tweet, userId, id }: Itweet) {
+  const [open, setOpen] = useState(false);
   const user = auth.currentUser;
   const handleDelete = async () => {
     const ok = confirm("정말로 삭제하시겠습니까?");
@@ -60,16 +77,24 @@ export default function Tweet({ username, photo, tweet, userId, id }: Itweet) {
     }
   };
 
+  const handleEdit = () => {
+    setOpen(!open);
+  };
+
   return (
     <Wrapper>
       <Column>
         <Username>{username}</Username>
         <Payload>{tweet}</Payload>
         {user?.uid === userId ? (
-          <DeleteBtn onClick={handleDelete}>삭제</DeleteBtn>
+          <BtnWrapper>
+            <DeleteBtn onClick={handleDelete}>삭제</DeleteBtn>
+            <EditBtn onClick={handleEdit}>삭제</EditBtn>
+          </BtnWrapper>
         ) : null}
       </Column>
       <Column>{photo ? <Photo src={photo} /> : null}</Column>
+      <Modal isOpen={open} onClose={() => setOpen(false)}></Modal>
     </Wrapper>
   );
 }
